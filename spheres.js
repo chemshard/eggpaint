@@ -1,16 +1,3 @@
-/*
-  spheres_blogger_compatible.js
-
-  Blogger-compatible p5 instance-mode wrapper for the user's SPHERES sketch.
-
-  Required Blogger HTML:
-    <div id="spheres-game"><div id="spheres-status">loading Spheres...</div></div>
-
-  Required theme scripts before </body>:
-    <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js'></script>
-    <script type='text/javascript' src='https://YOURUSERNAME.github.io/YOURREPO/spheres.js?v=1'></script>
-*/
-
 (function () {
   var CONTAINER_ID = "spheres-game";
   var STATUS_ID = "spheres-status";
@@ -207,6 +194,19 @@ function windowResized() {
     activeSphere.y = clamp(activeSphere.y, layout.fieldTop + layout.sphereSize / 2, layout.fieldBottom - layout.sphereSize / 2);
   }
 }
+
+function eventIsOnGameCanvas(event) {
+  // p5 touch/mouse callbacks can otherwise eat clicks and scrolling across the whole Blogger page.
+  // Only block default browser behaviour when the actual Spheres canvas was touched/clicked.
+  if (!gameCanvas || !gameCanvas.elt) return false;
+
+  if (event && event.target && event.target !== gameCanvas.elt) {
+    return false;
+  }
+
+  return mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height;
+}
+
 
 function setDifficulty(name) {
   difficultyName = name;
@@ -650,16 +650,19 @@ function gradeSphereTap() {
   }
 }
 
-function mousePressed() {
+function mousePressed(event) {
+  if (!eventIsOnGameCanvas(event)) return true;
   return handlePress();
 }
 
-function touchStarted() {
+function touchStarted(event) {
+  if (!eventIsOnGameCanvas(event)) return true;
   handlePress();
   return false;
 }
 
-function touchMoved() {
+function touchMoved(event) {
+  if (!eventIsOnGameCanvas(event)) return true;
   return false;
 }
 
