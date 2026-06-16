@@ -540,11 +540,6 @@
     noStroke();
     fill(250);
     rect(0, 0, PLAY_W, WORLD_H);
-
-    stroke(215);
-    strokeWeight(1);
-    for (let x = 0; x < PLAY_W; x += 40) line(x, 0, x, WORLD_H);
-    for (let y = 0; y < WORLD_H; y += 40) line(0, y, PLAY_W, y);
   }
 
   function drawPath() {
@@ -571,8 +566,6 @@
     fill(70);
     textAlign(CENTER, CENTER);
     textSize(12);
-    text("ENEMIES", 70, 26);
-    text("BASE", 548, 565);
   }
 
   function drawUi() {
