@@ -1,6 +1,10 @@
 (() => {
   "use strict";
 
+  if (!document.getElementById("tower-defense-container")) {
+    return;
+  }
+
   const WORLD_W = 800;
   const WORLD_H = 600;
   const UI_X = 600;
