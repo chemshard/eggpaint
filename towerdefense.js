@@ -366,6 +366,7 @@
   window.draw = function draw() {
     background(245);
     hoverWorld = screenToWorld(mouseX, mouseY);
+    textFont("monospace")
 
     push();
     scale(worldScale);
