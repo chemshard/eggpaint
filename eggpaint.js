@@ -378,10 +378,10 @@ function setup() {
   qualitySelect.option("Polished Metal");
   qualitySelect.selected("Matte");
 
-  eraseButton = createButton("Erase Canvas");
+  eraseButton = createButton("Erase");
   eraseButton.mousePressed(eraseCanvas);
 
-  newButton = createButton("New Canvas");
+  newButton = createButton("New");
   newButton.mousePressed(newCanvas);
 
   parentAndStyleControls();
