@@ -660,7 +660,7 @@
 
       if (waveNumber >= TOTAL_WAVES) {
         gameState = "won";
-        message = "You actually defended the rectangle. Cinema.";
+        message = "Wow. You really made it. Mission complete!";
       } else {
         const bonus = 35 + waveNumber * 8;
         money += bonus;
@@ -685,7 +685,7 @@
         if (baseHealth <= 0) {
           baseHealth = 0;
           gameState = "lost";
-          message = "Base got cooked.";
+          message = "RIP bruh you were just not good enough.";
         }
       }
     }
@@ -705,7 +705,7 @@
     waveActive = true;
     selectedBuild = null;
     selectedTower = null;
-    message = `Wave ${waveNumber} started. Good luck, tiny general.`;
+    message = `Wave ${waveNumber} started. Good luck, boi.`;
   }
 
   function generateWave(wave) {
