@@ -121,7 +121,17 @@ var heartState = 0;
 // scale with its parent container. Put <div id="bad-time-game"></div> wherever
 // you want it to appear, then load p5.js and this file.
 var BAD_TIME_CANVAS;
+
+// The heart is drawn inside push(); scale(1.5); translate(hx, hy);
+// so its visual position is 1.5 * (local coordinate + hx/hy).
+// These constants keep the collision circle aligned with the actual drawn heart.
+var BAD_TIME_HEART_SCALE = 1.5;
+var BAD_TIME_HEART_LOCAL_X = 200;
+var BAD_TIME_HEART_LOCAL_Y = 199;
 var BAD_TIME_HEART_RADIUS = 8;
+
+// Set this to true if you want to see the collision circle while testing.
+var BAD_TIME_SHOW_HITBOX = false;
 
 function resetRun() {
   gameCount = 0;
@@ -214,10 +224,26 @@ function keepHeartInBounds() {
 }
 
 function heartCenter() {
-  return { x: hx + 265, y: hy + 265 };
+  return {
+    x: BAD_TIME_HEART_SCALE * (hx + BAD_TIME_HEART_LOCAL_X),
+    y: BAD_TIME_HEART_SCALE * (hy + BAD_TIME_HEART_LOCAL_Y)
+  };
+}
+
+function drawHeartHitboxDebug() {
+  if (!BAD_TIME_SHOW_HITBOX) return;
+
+  var heart = heartCenter();
+  noFill();
+  stroke(0, 255, 120);
+  strokeWeight(1);
+  ellipse(heart.x, heart.y, BAD_TIME_HEART_RADIUS * 2, BAD_TIME_HEART_RADIUS * 2);
+  noStroke();
 }
 
 function circleRectHit(rx, ry, rw, rh, radius) {
+  // Circle-vs-rectangle collision: more accurate and less unfair than checking
+  // whether the heart centre alone is inside the obstacle rectangle.
   var heart = heartCenter();
   var nearestX = constrain(heart.x, rx, rx + rw);
   var nearestY = constrain(heart.y, ry, ry + rh);
@@ -255,18 +281,17 @@ p.setup = function setup() {
   BAD_TIME_CANVAS.elt.style.height = "auto";
   BAD_TIME_CANVAS.elt.style.margin = "0 auto";
   BAD_TIME_CANVAS.elt.style.touchAction = "none";
+  statusText("");
 }
 
 p.draw = function draw() {
   background(0);
   textFont("monospace");
 
-  var trueX = hx + 265;
-  var trueY = hy + 265;
-  var trueEX = enemyX + 200;
-  var trueEY = enemyY + 200;
-  var trueEX2 = enemyX2 + 200;
-  var trueEY2 = enemyY2 + 200;
+  var trueX = heartCenter().x;
+  var trueY = heartCenter().y;
+  var previousHx = hx;
+  var previousHy = hy;
 
   if (gameState === 1) {
     gameCount += 1;
@@ -402,6 +427,14 @@ p.draw = function draw() {
 
     keepHeartInBounds();
 
+    // Actual movement state after clamping. This prevents blue bones from hurting
+    // when a key is held but the heart is stuck against the battle-box wall.
+    isMoving = (hx !== previousHx || hy !== previousHy) ? 1 : 0;
+
+    var currentHeart = heartCenter();
+    trueX = currentHeart.x;
+    trueY = currentHeart.y;
+
     noStroke();
     fill(255);
     rect(75, 75, 250, 250);
@@ -428,6 +461,8 @@ p.draw = function draw() {
     vertex(194, 196);
     endShape();
     pop();
+
+    drawHeartHitboxDebug();
 
     textSize(190);
     if (gameCount < 60) {
@@ -759,7 +794,7 @@ p.draw = function draw() {
       rect(bone14X, 85, 10, 200);
       bone14X += 3;
 
-      damageIfHit(bone14X, 85, 10, 200, 85, false);
+      damageIfHit(bone14X, 85, 10, 200, 1, true);
     }
 
     if (gameCount > 1350 && bone15X < 315) {
@@ -767,7 +802,7 @@ p.draw = function draw() {
       rect(bone15X, 150, 10, 165);
       bone15X += 10;
 
-      damageIfHit(bone15X, 150, 10, 165, 1, false);
+      damageIfHit(bone15X, 150, 10, 165, 1, true);
     }
 
     if (gameCount > 1730 && bone16X < 315) {
