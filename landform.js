@@ -1,18 +1,3 @@
-/*
-  landform_blogger_compatible.js
-
-  Blogger-compatible p5 instance-mode wrapper for Landform.
-
-  Required Blogger post/page HTML:
-    <div id="landform-game"><div id="landform-status">loading Landform...</div></div>
-
-  Required Blogger theme scripts right before </body>:
-    <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js'></script>
-    <script type='text/javascript' src='https://YOURUSERNAME.github.io/YOURREPO/landform.js?v=1'></script>
-
-  Do not paste this file directly into a Blogger post. Host it externally, then link it.
-*/
-
 (function () {
   var CONTAINER_ID = "landform-game";
   var STATUS_IDS = ["landform-status", "p5-status"];
@@ -70,7 +55,7 @@
             "Spacebar"
           ];
         
-          if (gameKeys.includes(e.key)) {
+          if (gameKeys.includes(e.key) && landformKeyboardActive()) {
             e.preventDefault();
           }
         }
@@ -444,6 +429,40 @@
         const GAME_H = 400;
         let gameCanvas;
         let gameScale = 1;
+        let landformPointerInside = false;
+
+        function landformCanvasElement() {
+          return gameCanvas && gameCanvas.elt ? gameCanvas.elt : null;
+        }
+
+        function landformEventIsOnCanvas(event) {
+          const canvas = landformCanvasElement();
+          if (!canvas) return false;
+
+          const target = event && event.target;
+          if (target && (target === canvas || canvas.contains(target))) return true;
+
+          // Fallback for p5 events where the raw browser event is missing.
+          return mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height;
+        }
+
+        function landformFocusCanvas() {
+          const canvas = landformCanvasElement();
+          if (!canvas || typeof canvas.focus !== "function") return;
+
+          try {
+            canvas.focus({ preventScroll: true });
+          } catch (err) {
+            canvas.focus();
+          }
+        }
+
+        function landformKeyboardActive() {
+          const canvas = landformCanvasElement();
+          if (!canvas) return false;
+
+          return document.activeElement === canvas || landformPointerInside;
+        }
         
         function getGameParentWidth() {
           if (gameCanvas && gameCanvas.elt && gameCanvas.elt.parentElement) {
@@ -500,6 +519,32 @@
             gameCanvas.parent(holder);
           }
         
+          if (gameCanvas && gameCanvas.elt) {
+            gameCanvas.elt.setAttribute("tabindex", "0");
+
+            gameCanvas.elt.addEventListener("mouseenter", function () {
+              landformPointerInside = true;
+            });
+
+            gameCanvas.elt.addEventListener("mouseleave", function () {
+              landformPointerInside = false;
+            });
+
+            gameCanvas.elt.addEventListener("pointerdown", function () {
+              landformPointerInside = true;
+              landformFocusCanvas();
+            }, { passive: true });
+
+            gameCanvas.elt.addEventListener("touchstart", function () {
+              landformPointerInside = true;
+              landformFocusCanvas();
+            }, { passive: true });
+
+            gameCanvas.elt.addEventListener("blur", function () {
+              landformPointerInside = false;
+            });
+          }
+
           fitGameCanvas();
         }
         
@@ -2507,7 +2552,7 @@
           if (openGlossary === 0) {
             glossaryTimer = 0;
           }
-          if (keyIsPressed) {
+          if (keyIsPressed && landformKeyboardActive()) {
             if (keyCode === UP_ARROW) {
             rectY -= 1.5
           }
@@ -4397,10 +4442,31 @@
 
         p.draw = draw;
         p.windowResized = windowResized;
-        p.mouseDragged = mouseDragged;
-        p.touchStarted = touchStarted;
-        p.touchMoved = touchMoved;
-        p.mousePressed = mousePressed;
+
+        p.mouseDragged = function (event) {
+          if (!landformEventIsOnCanvas(event)) return true;
+          mouseDragged(event);
+          return false;
+        };
+
+        p.touchStarted = function (event) {
+          if (!landformEventIsOnCanvas(event)) return true;
+          touchStarted(event);
+          return false;
+        };
+
+        p.touchMoved = function (event) {
+          if (!landformEventIsOnCanvas(event)) return true;
+          touchMoved(event);
+          return false;
+        };
+
+        p.mousePressed = function (event) {
+          if (!landformEventIsOnCanvas(event)) return true;
+          landformFocusCanvas();
+          mousePressed(event);
+          return false;
+        };
       }
     }, holder);
   }
