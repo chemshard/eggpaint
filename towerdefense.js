@@ -475,17 +475,6 @@
       () => false,
       () => !selectedTower || gameState !== "playing"
     ));
-
-    buttons.push(new Button(
-      UI_X + 18,
-      486,
-      164,
-      42,
-      () => gameState === "playing" ? "Restart" : "Play Again",
-      () => initialiseGame(),
-      () => false,
-      () => false
-    ));
   }
 
   function fitCanvas() {
