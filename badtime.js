@@ -1,3 +1,34 @@
+(function () {
+  var CONTAINER_ID = "bad-time-game";
+  var STATUS_ID = "bad-time-status";
+  var started = false;
+  var tries = 0;
+
+  function statusText(text) {
+    var s = document.getElementById(STATUS_ID);
+    if (s) s.textContent = text;
+  }
+
+  function startBadTimeGame() {
+    var holder = document.getElementById(CONTAINER_ID);
+
+    // This file can be loaded site-wide in Blogger.
+    // If this page has no Bad Time container, silently stop.
+    if (!holder) {
+      return;
+    }
+
+    if (started || holder.__badTimeStarted) return;
+    started = true;
+    holder.__badTimeStarted = true;
+
+    statusText("p5 loaded. starting Bad Time...");
+
+    new p5(function (p) {
+      // Run the original global-mode sketch inside this p5 instance.
+      // This avoids setup()/draw() collisions with Blogger or other games.
+      with (p) {
+
 var gameCount = 0;
 var gameState = 0;
 var titleCount = 0;
@@ -214,8 +245,8 @@ function leftHeld() { return keyIsDown(LEFT_ARROW) || keyIsDown(65); }
 function rightHeld() { return keyIsDown(RIGHT_ARROW) || keyIsDown(68); }
 
 
-function setup() {
-  var holder = document.getElementById("bad-time-game") || document.body;
+p.setup = function setup() {
+  holder.innerHTML = "";
   BAD_TIME_CANVAS = createCanvas(400, 400);
   BAD_TIME_CANVAS.parent(holder);
   BAD_TIME_CANVAS.elt.style.display = "block";
@@ -226,7 +257,7 @@ function setup() {
   BAD_TIME_CANVAS.elt.style.touchAction = "none";
 }
 
-function draw() {
+p.draw = function draw() {
   background(0);
   textFont("monospace");
 
@@ -1198,7 +1229,7 @@ function draw() {
   }
 }
 
-keyPressed = function () {
+p.keyPressed = function() {
   keys[key.toString().toLowerCase()] = true;
   keys[keyCode] = true;
 
@@ -1210,7 +1241,7 @@ keyPressed = function () {
     return false;
   }
 };
-keyReleased = function () {
+p.keyReleased = function() {
   delete keys[keyCode];
   delete keys[key.toString().toLowerCase()];
 
@@ -1218,7 +1249,7 @@ keyReleased = function () {
     return false;
   }
 };
-mousePressed = function () {
+p.mousePressed = function() {
   if (
     mouseX > 150 &&
     mouseY > 260 &&
@@ -1230,3 +1261,30 @@ mousePressed = function () {
     startGame();
   }
 };
+
+
+      }
+    }, holder);
+  }
+
+  function waitForP5() {
+    if (window.p5) {
+      startBadTimeGame();
+      return;
+    }
+
+    tries += 1;
+
+    if (tries < 200) {
+      setTimeout(waitForP5, 50);
+    } else {
+      statusText("p5 did not load. Check that the p5.js script is included before this game file.");
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForP5);
+  } else {
+    waitForP5();
+  }
+})();
