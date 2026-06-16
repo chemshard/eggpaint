@@ -1,25 +1,3 @@
-/*
-  tower_defense_fresh.js
-  A clean p5.js tower defense game.
-
-  How to use:
-  1. Put this file somewhere public, e.g. GitHub Pages.
-  2. Include p5.js before this file:
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
-     <script src="tower_defense_fresh.js"></script>
-
-  Optional:
-  Add <div id="tower-defense-container"></div> where you want the game to appear.
-  If that div exists, the canvas will be placed inside it. Otherwise it appears in the body.
-
-  Controls:
-  - Click a tower type on the right.
-  - Click a valid build spot to place it.
-  - Click an existing tower to select it.
-  - Upgrade/sell selected towers from the right panel.
-  - Click "Start Wave" to begin the next wave.
-*/
-
 (() => {
   "use strict";
 
@@ -493,7 +471,7 @@
 
     buttons.push(new Button(
       UI_X + 18,
-      528,
+      458,
       164,
       42,
       () => gameState === "playing" ? "Restart" : "Play Again",
