@@ -347,9 +347,16 @@
   }
 
   window.setup = function setup() {
-    pixelDensity(1);
-    fitCanvas();
-    initialiseGame();
+     pixelDensity(1);
+
+     const parent = document.getElementById("tower-defense-container");
+     if (!parent) {
+       noLoop();
+       return;
+     }
+
+     fitCanvas();
+     initialiseGame();
   };
 
   window.draw = function draw() {
@@ -483,7 +490,12 @@
 
   function fitCanvas() {
     const parent = document.getElementById("tower-defense-container");
-    const availableWidth = parent ? parent.clientWidth : window.innerWidth;
+
+    // No container = no game.
+    // This stops it appearing at the bottom of every page.
+    if (!parent) return;
+  
+    const availableWidth = parent.clientWidth || window.innerWidth;
     const maxWidth = Math.min(900, Math.max(320, availableWidth || 800));
 
     let fittedW = maxWidth;
@@ -499,7 +511,7 @@
 
     if (!canvas) {
       canvas = createCanvas(fittedW, fittedH);
-      if (parent) canvas.parent(parent);
+      canvas.parent(parent);
       canvas.style("display", "block");
       canvas.style("margin", "0 auto");
       canvas.style("max-width", "100%");
