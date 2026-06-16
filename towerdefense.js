@@ -471,7 +471,7 @@
 
     buttons.push(new Button(
       UI_X + 18,
-      458,
+      486,
       164,
       42,
       () => gameState === "playing" ? "Restart" : "Play Again",
